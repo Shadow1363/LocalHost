@@ -9,6 +9,9 @@
   Automatically detects your project’s port from common config files like <code>.env</code>, <code>package.json</code>, or <code>mkdocs.yml</code>.
 </p>
 
+![In action!](https://github.com/user-attachments/assets/a38c6436-07f9-4250-be74-4a3ec6616dbb)
+
+
 ---
 
 
