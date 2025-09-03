@@ -1,0 +1,17 @@
+# Ignore node_modules except production deps
+node_modules/
+
+# Ignore TypeScript source files
+src/
+
+# Ignore config files not needed in VSIX
+tsconfig.json
+.vscode/
+
+# Git and IDE files
+.git
+.gitignore
+.DS_Store
+
+# Optional: ignore tests if any
+test/

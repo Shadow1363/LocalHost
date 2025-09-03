@@ -2,6 +2,10 @@
   "name": "localhost-browser",
   "displayName": "Localhost Browser",
   "description": "Open localhost in Simple Browser with automatic port detection",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shadow1363/localhost.git"
+  },
   "version": "1.0.0",
   "engines": {
     "vscode": "^1.74.0"
@@ -14,21 +18,12 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "views": {
-      "localhostBrowser": [
-        {
-          "id": "localhostBrowserView",
-          "name": "Localhost Browser",
-          "when": "true"
-        }
-      ]
-    },
     "viewsContainers": {
       "activitybar": [
         {
           "id": "localhostBrowser",
           "title": "Localhost Browser",
-          "icon": "$(globe)"
+          "icon": "$(browser)"
         }
       ]
     },
@@ -36,7 +31,7 @@
       {
         "command": "localhostBrowser.openBrowser",
         "title": "Open Localhost",
-        "icon": "./resources/open-in-browser.svg"
+        "icon": "./resources/icon.svg"
       }
     ],
     "keybindings": [
@@ -96,8 +91,11 @@
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/vscode": "^1.60.0",
     "@types/node": "16.x",
+    "@types/vscode": "^1.60.0",
     "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "@vscode/vsce": "^3.6.0"
   }
 }

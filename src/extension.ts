@@ -1,29 +1,29 @@
 import * as vscode from "vscode";
-import * as fs from "fs";
-import * as path from "path";
+import * as fs from "node:fs";
+import * as path from "node:path";
 
 export function activate(context: vscode.ExtensionContext) {
-  // Create a status bar item
+  // Status bar item
   const statusBarItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right,
     100
   );
-  statusBarItem.text = "$(globe) Open Localhost";
+  statusBarItem.text = "$(browser) Open Localhost";
   statusBarItem.tooltip = "Click to open localhost in Simple Browser";
   statusBarItem.command = "localhostBrowser.openBrowser";
   statusBarItem.show();
 
-  // Register the command
+  // Command registration
   const disposable = vscode.commands.registerCommand(
     "localhostBrowser.openBrowser",
     async () => {
       const port = await findPort();
       const url = port ? `localhost:${port}` : "localhost";
 
-      // Execute the SimpleBrowser: Show command
+      // Open in Simple Browser
       await vscode.commands.executeCommand("simpleBrowser.show", url);
 
-      // Show a status message
+      // Status message
       vscode.window.setStatusBarMessage(
         `Opened ${url} in Simple Browser`,
         3000
@@ -31,50 +31,52 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(disposable);
-  context.subscriptions.push(statusBarItem);
+  context.subscriptions.push(disposable, statusBarItem);
 }
 
 async function findPort(): Promise<string | null> {
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-  if (!workspaceFolders) {
-    return null;
-  }
+  const folders = vscode.workspace.workspaceFolders;
+  if (!folders) return null;
 
-  const rootPath = workspaceFolders[0].uri.fsPath;
+  const root = folders[0].uri.fsPath;
   const config = vscode.workspace.getConfiguration("localhostBrowser");
-  const searchPaths = config.get<string[]>("searchPaths") || [
-    ".env",
-    ".env.local",
-    ".env.development",
-    "package.json",
-    "docker-compose.yml",
-    "docker-compose.yaml",
-    "Dockerfile",
-    "next.config.js",
-    "vite.config.js",
-    "vite.config.ts",
-    "angular.json",
-    "vue.config.js",
-  ];
+  let searchFiles = config.get<string[]>("searchPaths") ?? [];
+  // Ensure mkdocs.yml is included
+  searchFiles = Array.from(
+    new Set([
+      "mkdocs.yml",
+      "mkdocs.yaml",
+      ...searchFiles,
+      ".env",
+      ".env.local",
+      ".env.development",
+      "package.json",
+      "docker-compose.yml",
+      "docker-compose.yaml",
+      "Dockerfile",
+      "next.config.js",
+      "vite.config.js",
+      "vite.config.ts",
+      "angular.json",
+      "vue.config.js",
+    ])
+  );
 
-  for (const fileName of searchPaths) {
-    const filePath = path.join(rootPath, fileName);
+  for (const fileName of searchFiles) {
+    const filePath = path.join(root, fileName);
+    // console.log("checking file", fileName, filePath);
+    if (!fs.existsSync(filePath)) continue;
 
-    if (fs.existsSync(filePath)) {
-      try {
-        const content = fs.readFileSync(filePath, "utf8");
-        const port = extractPortFromContent(content, fileName);
-        if (port) {
-          return port;
-        }
-      } catch (error) {
-        console.log(`Error reading ${fileName}:`, error);
-      }
+    try {
+      const content = fs.readFileSync(filePath, "utf8");
+      const port = extractPort(content, fileName);
+      if (port) return port;
+    } catch {
+      // ignore read errors
     }
   }
 
-  // Check for running processes on common development ports
+  // Fallback to common development ports
   const commonPorts = [
     "3000",
     "3001",
@@ -87,129 +89,58 @@ async function findPort(): Promise<string | null> {
     "9000",
   ];
   for (const port of commonPorts) {
-    if (await isPortInUse(port)) {
-      return port;
-    }
+    if (await isPortInUse(port)) return port;
   }
 
   return null;
 }
 
-function extractPortFromContent(
-  content: string,
-  fileName: string
-): string | null {
-  // For .env files
+function extractPort(content: string, fileName: string): string | null {
+  // console.log("CONTENT", fileName);
+  // MkDocs Material default port
+  if (fileName === "mkdocs.yml") return "8000";
+
+  // .env files
   if (fileName.startsWith(".env")) {
-    const portMatch = content.match(/^PORT\s*=\s*(\d+)/m);
-    if (portMatch) {
-      return portMatch[1];
-    }
+    const match = content.match(/^PORT\s*=\s*(\d+)/m);
+    if (match) return match[1];
   }
 
-  // For package.json
+  // package.json scripts
   if (fileName === "package.json") {
     try {
       const pkg = JSON.parse(content);
-      // Check scripts for port configurations
       if (pkg.scripts) {
         for (const script of Object.values(pkg.scripts)) {
-          const portMatch = (script as string).match(
+          const match = (script as string).match(
             /(?:--port|--port=|-p)\s*(\d+)/
           );
-          if (portMatch) {
-            return portMatch[1];
-          }
+          if (match) return match[1];
         }
       }
-    } catch (e) {
-      // Invalid JSON, skip
-    }
+    } catch {}
   }
 
-  // For docker-compose files
+  // docker-compose
   if (fileName.includes("docker-compose")) {
-    const portMatch = content.match(/ports:\s*\n\s*-\s*["']?(\d+):/m);
-    if (portMatch) {
-      return portMatch[1];
-    }
+    const match = content.match(/ports:\s*\n\s*-\s*["']?(\d+):/m);
+    if (match) return match[1];
   }
 
-  // For config files (Next.js, Vite, etc.)
+  // config files (Next.js, Vite, etc.)
   if (fileName.includes("config")) {
-    const portMatch = content.match(/port:\s*(\d+)/);
-    if (portMatch) {
-      return portMatch[1];
-    }
+    const match = content.match(/port:\s*(\d+)/);
+    if (match) return match[1];
   }
 
-  // Generic PORT pattern search
-  const genericPortMatch = content.match(/PORT\s*[:=]\s*(\d+)/i);
-  if (genericPortMatch) {
-    return genericPortMatch[1];
-  }
-
-  return null;
+  // Generic PORT
+  const genericMatch = content.match(/PORT\s*[:=]\s*(\d+)/i);
+  return genericMatch ? genericMatch[1] : null;
 }
 
 async function isPortInUse(port: string): Promise<boolean> {
-  // This is a simplified check - in a real implementation you might want to
-  // actually check if the port is listening, but for now we'll return false
-  // since we don't have access to network checking in this context
+  // Simplified placeholder
   return false;
-}
-
-class LocalhostBrowserProvider
-  implements vscode.TreeDataProvider<LocalhostBrowserItem>
-{
-  private _onDidChangeTreeData: vscode.EventEmitter<
-    LocalhostBrowserItem | undefined | null | void
-  > = new vscode.EventEmitter<LocalhostBrowserItem | undefined | null | void>();
-  readonly onDidChangeTreeData: vscode.Event<
-    LocalhostBrowserItem | undefined | null | void
-  > = this._onDidChangeTreeData.event;
-
-  constructor() {}
-
-  refresh(): void {
-    this._onDidChangeTreeData.fire();
-  }
-
-  getTreeItem(element: LocalhostBrowserItem): vscode.TreeItem {
-    return element;
-  }
-
-  getChildren(
-    element?: LocalhostBrowserItem
-  ): Thenable<LocalhostBrowserItem[]> {
-    if (!element) {
-      return Promise.resolve([
-        new LocalhostBrowserItem(
-          "Click to open localhost",
-          "Open localhost in Simple Browser",
-          vscode.TreeItemCollapsibleState.None,
-          {
-            command: "localhostBrowser.openBrowser",
-            title: "Open Localhost",
-          }
-        ),
-      ]);
-    }
-    return Promise.resolve([]);
-  }
-}
-
-class LocalhostBrowserItem extends vscode.TreeItem {
-  constructor(
-    public readonly label: string,
-    public readonly tooltip: string,
-    public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-    public readonly command?: vscode.Command
-  ) {
-    super(label, collapsibleState);
-    this.tooltip = tooltip;
-    this.iconPath = new vscode.ThemeIcon("globe");
-  }
 }
 
 export function deactivate() {}
