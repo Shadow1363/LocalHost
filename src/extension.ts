@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
     "localhostBrowser.openBrowser",
     async () => {
       const port = await findPort();
-      const url = port ? `localhost:${port}` : "localhost";
+      const url = port ? `http://localhost:${port}` : "http://localhost";
 
       // Open in Simple Browser
       await vscode.commands.executeCommand("simpleBrowser.show", url);
