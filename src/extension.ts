@@ -40,13 +40,15 @@ async function findPort(): Promise<string | null> {
 
   const root = folders[0].uri.fsPath;
   const config = vscode.workspace.getConfiguration("localhostBrowser");
-  let searchFiles = config.get<string[]>("searchPaths") ?? [];
-  // Ensure mkdocs.yml is included
-  searchFiles = Array.from(
-    new Set([
+
+  // Get user/workspace setting
+  let searchFiles = config.get<string[]>("searchPaths");
+
+  // If no setting exists, use default array
+  if (!searchFiles || searchFiles.length === 0) {
+    searchFiles = [
       "mkdocs.yml",
       "mkdocs.yaml",
-      ...searchFiles,
       ".env",
       ".env.local",
       ".env.development",
@@ -59,8 +61,11 @@ async function findPort(): Promise<string | null> {
       "vite.config.ts",
       "angular.json",
       "vue.config.js",
-    ])
-  );
+    ];
+  }
+
+  // Convert to Set to remove duplicates (optional)
+  searchFiles = Array.from(new Set(searchFiles));
 
   for (const fileName of searchFiles) {
     const filePath = path.join(root, fileName);

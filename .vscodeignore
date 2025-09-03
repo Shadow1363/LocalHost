@@ -1,6 +1,9 @@
 # Ignore node_modules except production deps
 node_modules/
 
+# Personal use
+cover/
+
 # Ignore TypeScript source files
 src/
 
