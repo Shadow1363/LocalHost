@@ -1,0 +1,103 @@
+{
+  "name": "localhost-browser",
+  "displayName": "Localhost Browser",
+  "description": "Open localhost in Simple Browser with automatic port detection",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "views": {
+      "localhostBrowser": [
+        {
+          "id": "localhostBrowserView",
+          "name": "Localhost Browser",
+          "when": "true"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "localhostBrowser",
+          "title": "Localhost Browser",
+          "icon": "$(globe)"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "localhostBrowser.openBrowser",
+        "title": "Open Localhost",
+        "icon": "./resources/open-in-browser.svg"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "localhostBrowser.openBrowser",
+        "key": "ctrl+shift+l",
+        "mac": "cmd+shift+l",
+        "when": "editorTextFocus"
+      }
+    ],
+    "configuration": {
+      "title": "Localhost Browser",
+      "properties": {
+        "localhostBrowser.keybinding": {
+          "type": "string",
+          "default": "ctrl+shift+l",
+          "description": "Keyboard shortcut to open localhost browser. Use format like 'ctrl+shift+l' or 'cmd+shift+l' for Mac. Requires reload to take effect.",
+          "scope": "application"
+        },
+        "localhostBrowser.defaultPort": {
+          "type": "string",
+          "default": "",
+          "description": "Default port to use when no PORT is detected in project files. Leave empty to use plain 'localhost'.",
+          "scope": "resource"
+        },
+        "localhostBrowser.searchPaths": {
+          "type": "array",
+          "default": [
+            ".env",
+            ".env.local",
+            ".env.development",
+            "package.json",
+            "docker-compose.yml",
+            "docker-compose.yaml",
+            "next.config.js",
+            "vite.config.js",
+            "vite.config.ts"
+          ],
+          "description": "List of files to search for PORT configuration",
+          "scope": "resource"
+        }
+      }
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "localhostBrowser.openBrowser",
+          "when": "view == localhostBrowserView",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.60.0",
+    "@types/node": "16.x",
+    "typescript": "^4.9.4"
+  }
+}
