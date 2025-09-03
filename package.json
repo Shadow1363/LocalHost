@@ -2,13 +2,13 @@
   "name": "localhost-browser",
   "displayName": "Localhost Browser",
   "publisher": "TomsMartinez",
-  "icon": "./resources/localhostbrowser.png",
+  "icon": "./resources/icon.webp",
   "description": "Open localhost in Simple Browser with automatic port detection",
   "repository": {
     "type": "git",
     "url": "https://github.com/shadow1363/localhost.git"
   },
-  "version": "1.0.0",
+  "version": "1.1.1",
   "engines": {
     "vscode": "^1.74.0"
   },
