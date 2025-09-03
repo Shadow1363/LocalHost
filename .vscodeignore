@@ -3,6 +3,7 @@ node_modules/
 
 # Personal use
 cover/
+.env
 
 # Ignore TypeScript source files
 src/
