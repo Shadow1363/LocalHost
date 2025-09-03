@@ -1,9 +1,16 @@
-# Localhost Browser
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Shadow1363/LocalHost/refs/heads/main/cover/cover.webp" alt="Localhost Browser Cover" width="150"/>
+</p>
 
-Easily open your localhost in VSCode's Simple Browser with a single click or keyboard shortcut.  
-Automatically detects your project’s port from common config files like `.env`, `package.json`, or `mkdocs.yml`.
+<h1 align="center">Localhost Browser</h1>
+
+<p align="center">
+  Easily open your localhost in VSCode's Simple Browser with a single click or keyboard shortcut.<br/>
+  Automatically detects your project’s port from common config files like <code>.env</code>, <code>package.json</code>, or <code>mkdocs.yml</code>.
+</p>
 
 ---
+
 
 ## Features
 
