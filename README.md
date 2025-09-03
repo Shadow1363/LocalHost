@@ -7,6 +7,7 @@ Automatically detects your project’s port from common config files like `.env`
 
 ## Features
 
+- Lightweight
 - Open localhost in **Simple Browser** directly from the **status bar**.
 - Automatic **port detection** from `.env`, `package.json`, `mkdocs.yml`, `docker-compose`, and more.
 - Configurable **default port** if no port is detected.
