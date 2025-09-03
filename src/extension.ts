@@ -3,11 +3,15 @@ import * as fs from "fs";
 import * as path from "path";
 
 export function activate(context: vscode.ExtensionContext) {
-  // Register the tree data provider
-  const provider = new LocalhostBrowserProvider();
-  vscode.window.createTreeView("localhostBrowserView", {
-    treeDataProvider: provider,
-  });
+  // Create a status bar item
+  const statusBarItem = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right,
+    100
+  );
+  statusBarItem.text = "$(globe) Open Localhost";
+  statusBarItem.tooltip = "Click to open localhost in Simple Browser";
+  statusBarItem.command = "localhostBrowser.openBrowser";
+  statusBarItem.show();
 
   // Register the command
   const disposable = vscode.commands.registerCommand(
@@ -28,6 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(disposable);
+  context.subscriptions.push(statusBarItem);
 }
 
 async function findPort(): Promise<string | null> {
