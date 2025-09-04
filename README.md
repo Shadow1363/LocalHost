@@ -37,7 +37,7 @@
 
 ## Usage
 
-1. Click the **status bar item**: `$(globe) Open Localhost`.
+1. Click the **status bar item**: `$(browser) Open Localhost`.
 2. Or use the **keyboard shortcut** (`Shift + Ctrl + L`).
 3. The Simple Browser will open with your detected or default localhost port.
 
