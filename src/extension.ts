@@ -83,6 +83,7 @@ async function findPort(): Promise<string | null> {
 
   // Fallback to common development ports
   const commonPorts = [
+    "5173",
     "3000",
     "3001",
     "4200",
@@ -107,7 +108,13 @@ function extractPort(content: string, fileName: string): string | null {
 
   // .env files
   if (fileName.startsWith(".env")) {
-    const match = content.match(/^PORT\s*=\s*(\d+)/m);
+    const match = content.match(/(?:VITE_PORT|PORT)\s*=\s*(\d+)/m);
+    if (match) return match[1];
+  }
+
+  // Vite config
+  if (fileName.startsWith("vite.config")) {
+    const match = content.match(/server\s*:\s*{[^}]*port\s*:\s*(\d+)/m);
     if (match) return match[1];
   }
 
