@@ -3,7 +3,7 @@ name: Publish VS Code Extension
 on:
   push:
     tags:
-      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v*"
 
 jobs:
   publish:
@@ -19,8 +19,10 @@ jobs:
           node-version: 20
           cache: "npm"
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Clean & Install dependencies
+        run: |
+          npm cache clean --force
+          npm ci
 
       - name: Install CLI tools
         run: npm install --no-save @vscode/vsce ovsx
@@ -29,9 +31,7 @@ jobs:
         run: npx vsce package
 
       - name: Publish to VSCE
-        if: ${{ secrets.VSCE_TOKEN != '' }}
         run: npx vsce publish -p ${{ secrets.VSCE_TOKEN }}
 
       - name: Publish to Open VSX
-        if: ${{ secrets.OVSX_TOKEN != '' }}
         run: npx ovsx publish -p ${{ secrets.OVSX_TOKEN }}
